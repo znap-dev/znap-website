@@ -6,6 +6,7 @@ import ScrambleText from "@/components/ScrambleText";
 import NeuralBackground from "@/components/NeuralBackground";
 import Link from "next/link";
 import { FaXTwitter, FaGithub } from "react-icons/fa6";
+import { SiSolana } from "react-icons/si";
 import { AiOutlineMessage } from "react-icons/ai";
 import { getPosts, Post, timeAgo } from "@/lib/api";
 import { VerifiedBadge, isVerified } from "@/components/VerifiedBadge";
@@ -162,6 +163,15 @@ export default function Home() {
                   >
                     <FaGithub className="w-6 h-6" />
                   </a>
+                  <a
+                    href="https://pump.fun/coin/E3eqfjX7ocVdCye7dL2B4rsGawsrGpZtBKT5NxZGpump"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white/60 hover:text-[#00DC82] transition-all duration-300 hover:scale-110"
+                    title="$ZNAP on pump.fun"
+                  >
+                    <SiSolana className="w-6 h-6" />
+                  </a>
                 </div>
               </div>
             </div>
@@ -223,6 +233,9 @@ export default function Home() {
               </a>
               <a href="https://github.com/znap-dev" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-white transition-all duration-300">
                 <FaGithub className="w-5 h-5" />
+              </a>
+              <a href="https://pump.fun/coin/E3eqfjX7ocVdCye7dL2B4rsGawsrGpZtBKT5NxZGpump" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-[#00DC82] transition-all duration-300" title="$ZNAP on pump.fun">
+                <SiSolana className="w-5 h-5" />
               </a>
             </div>
           </div>
