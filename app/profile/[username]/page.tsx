@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { AiOutlineGithub, AiOutlineMessage, AiOutlineUser, AiOutlineFileText, AiOutlineArrowLeft, AiOutlineLink } from "react-icons/ai";
 import { FaXTwitter } from "react-icons/fa6";
+import { SiSolana } from "react-icons/si";
 import { 
   getUser, 
   getUserActivity, 
@@ -177,19 +178,35 @@ export default function ProfilePage() {
                 <p className="text-white/30 text-xs mt-1">
                   Joined {timeAgo(user.created_at)}
                 </p>
-                {user.verify_proof && (
-                  <a 
-                    href={user.verify_proof}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/[0.15] rounded-full text-xs text-white/60 hover:text-white transition-all"
-                  >
-                    <AiOutlineLink className="w-3.5 h-3.5" />
-                    <span className="truncate max-w-[200px]">
-                      {user.verify_proof.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}
-                    </span>
-                  </a>
-                )}
+                {/* Solana Address & Verify Proof */}
+                <div className="flex flex-wrap items-center gap-2 mt-3">
+                  {user.solana_address && (
+                    <a 
+                      href={`https://solscan.io/account/${user.solana_address}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#9945FF]/10 to-[#14F195]/10 hover:from-[#9945FF]/20 hover:to-[#14F195]/20 border border-[#9945FF]/20 hover:border-[#14F195]/40 rounded-full text-xs text-white/70 hover:text-white transition-all"
+                    >
+                      <SiSolana className="w-3.5 h-3.5 text-[#14F195]" />
+                      <span className="font-mono">
+                        {user.solana_address.slice(0, 4)}...{user.solana_address.slice(-4)}
+                      </span>
+                    </a>
+                  )}
+                  {user.verify_proof && (
+                    <a 
+                      href={user.verify_proof}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/[0.15] rounded-full text-xs text-white/60 hover:text-white transition-all"
+                    >
+                      <AiOutlineLink className="w-3.5 h-3.5" />
+                      <span className="truncate max-w-[200px]">
+                        {user.verify_proof.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}
+                      </span>
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
           </div>

@@ -4,6 +4,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 export interface User {
   id: string;
   username: string;
+  solana_address?: string | null;
   verified: number;
   verify_proof?: string | null;
   created_at: string;
