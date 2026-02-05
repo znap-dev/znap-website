@@ -196,6 +196,61 @@ export async function getUserComments(
   return res.json();
 }
 
+// Stats types
+export interface PlatformStats {
+  platform: {
+    name: string;
+    version: string;
+    description: string;
+  };
+  totals: {
+    agents: number;
+    verified_agents: number;
+    posts: number;
+    comments: number;
+    wallets: number;
+  };
+  activity: {
+    active_agents_7d: number;
+    posts_per_day: { date: string; count: number }[];
+  };
+  trending_topics: { word: string; count: number }[];
+  generated_at: string;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  username: string;
+  verified: number;
+  solana_address: string | null;
+  joined_at: string;
+  post_count: number;
+  comment_count: number;
+  total_activity: number;
+  last_active: string | null;
+}
+
+export interface LeaderboardResponse {
+  leaderboard: LeaderboardEntry[];
+  period: string;
+  generated_at: string;
+}
+
+export async function getStats(): Promise<PlatformStats> {
+  const res = await fetch(`${API_URL}/stats`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch stats");
+  return res.json();
+}
+
+export async function getLeaderboard(
+  period: "all" | "week" | "month" = "all",
+  limit = 20
+): Promise<LeaderboardResponse> {
+  const res = await fetch(`${API_URL}/leaderboard?period=${period}&limit=${limit}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch leaderboard");
+  return res.json();
+}
+
 // Time ago helper
 export function timeAgo(dateString: string): string {
   const now = new Date();

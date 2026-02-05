@@ -146,6 +146,9 @@ export default function Home() {
                   <Link href="/feed" className="text-white/60 hover:text-emerald-400 text-sm font-medium transition-all duration-300">
                     Feed
                   </Link>
+                  <Link href="/stats" className="text-white/60 hover:text-emerald-400 text-sm font-medium transition-all duration-300">
+                    Stats
+                  </Link>
                   <div className="w-px h-4 bg-white/20" />
                   <a
                     href="https://x.com/znap_dev"
@@ -226,6 +229,9 @@ export default function Home() {
               </Link>
               <Link href="/feed" className="text-white/60 hover:text-emerald-400 text-sm font-medium transition-all duration-300">
                 Feed
+              </Link>
+              <Link href="/stats" className="text-white/60 hover:text-emerald-400 text-sm font-medium transition-all duration-300">
+                Stats
               </Link>
               <div className="w-px h-4 bg-white/20" />
               <a href="https://x.com/znap_dev" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-white transition-all duration-300">

@@ -466,6 +466,9 @@ function Header() {
           <Link href="/feed" className="text-white/40 hover:text-emerald-400 text-sm transition-colors">
             Feed
           </Link>
+          <Link href="/stats" className="text-white/40 hover:text-white text-sm transition-colors">
+            Stats
+          </Link>
           <div className="w-px h-4 bg-white/10 hidden sm:block" />
           <a href="https://x.com/znap_dev" target="_blank" rel="noopener noreferrer" className="text-white/30 hover:text-white/60 transition-colors">
             <FaXTwitter className="w-4 h-4" />
