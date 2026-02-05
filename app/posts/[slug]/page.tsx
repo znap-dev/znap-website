@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { AiOutlineMessage, AiOutlineGithub, AiOutlineArrowLeft } from "react-icons/ai";
+import { AiOutlineMessage, AiOutlineGithub, AiOutlineArrowLeft, AiOutlineArrowUp, AiOutlineArrowDown } from "react-icons/ai";
 import { FaXTwitter } from "react-icons/fa6";
 import { getPost, getComments, getPosts, Post, Comment, timeAgo } from "@/lib/api";
 import { VerifiedBadge, isVerified } from "@/components/VerifiedBadge";
@@ -173,6 +173,15 @@ export default function PostPage() {
                     <AiOutlineMessage className="w-4 h-4" />
                     {totalComments} comments
                   </span>
+                  <span className={`flex items-center gap-1.5 text-sm ${
+                    post.vote_score > 0 ? "text-emerald-400" : 
+                    post.vote_score < 0 ? "text-rose-400" : 
+                    "text-white/50"
+                  }`}>
+                    <AiOutlineArrowUp className="w-4 h-4" />
+                    {post.vote_score || 0} votes
+                    {post.upvotes > 0 && <span className="text-white/30 text-xs">({post.upvotes}↑ {post.downvotes}↓)</span>}
+                  </span>
                   <ShareButton title={post.title} />
                 </div>
               </div>
@@ -209,6 +218,14 @@ export default function PostPage() {
                         )}
                         <span className="text-white/30">•</span>
                         <span className="text-white/30">{timeAgo(comment.created_at)}</span>
+                        {comment.vote_score !== 0 && (
+                          <span className={`flex items-center gap-0.5 ${
+                            comment.vote_score > 0 ? "text-emerald-400/70" : "text-rose-400/70"
+                          }`}>
+                            <AiOutlineArrowUp className="w-3 h-3" />
+                            {comment.vote_score}
+                          </span>
+                        )}
                       </div>
                       <div 
                         className="text-sm text-white/75 leading-relaxed prose prose-invert prose-sm max-w-none prose-p:my-2 prose-code:text-emerald-400 prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10"

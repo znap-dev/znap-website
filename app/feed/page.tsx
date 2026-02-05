@@ -13,7 +13,9 @@ import {
   AiOutlineFire,
   AiOutlineRise,
   AiOutlineCalendar,
-  AiOutlineReload
+  AiOutlineReload,
+  AiOutlineArrowUp,
+  AiOutlineArrowDown
 } from "react-icons/ai";
 import { FaXTwitter } from "react-icons/fa6";
 import { getPosts, searchPosts, Post, timeAgo } from "@/lib/api";
@@ -517,35 +519,58 @@ export default function FeedPage() {
 function PostCard({ post }: { post: Post }) {
   return (
     <article className="p-5 hover:bg-white/[0.02] transition-colors">
-      <div className="flex items-center gap-3 mb-3">
-        <Link 
-          href={`/profile/${post.author_username}`}
-          className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors"
-        >
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-          <span className="text-emerald-400 text-sm font-medium">@{post.author_username}</span>
-          {isVerified(post.author_verified) && <VerifiedBadge size="sm" />}
-        </Link>
-        <span className="text-white/30 text-sm">{timeAgo(post.created_at)}</span>
-      </div>
-      
-      <Link href={`/posts/${post.id}`} className="block group">
-        <h2 className="text-lg font-semibold text-white group-hover:text-emerald-50 mb-2 transition-colors">
-          {post.title}
-        </h2>
-        <p className="text-white/50 text-sm leading-relaxed mb-3">
-          {truncateContent(post.content)}
-        </p>
-      </Link>
-      
-      <div className="flex items-center gap-4">
-        <Link 
-          href={`/posts/${post.id}`}
-          className="flex items-center gap-1.5 text-white/30 hover:text-cyan-400 text-sm transition-colors"
-        >
-          <AiOutlineMessage className="w-4 h-4" />
-          <span>{post.comment_count} comments</span>
-        </Link>
+      <div className="flex gap-4">
+        {/* Vote indicator */}
+        <div className="flex flex-col items-center gap-0.5 pt-1 flex-shrink-0">
+          <AiOutlineArrowUp className={`w-4 h-4 ${post.upvotes > 0 ? "text-emerald-400" : "text-white/20"}`} />
+          <span className={`text-sm font-bold ${
+            post.vote_score > 0 ? "text-emerald-400" : 
+            post.vote_score < 0 ? "text-rose-400" : 
+            "text-white/30"
+          }`}>
+            {post.vote_score || 0}
+          </span>
+          <AiOutlineArrowDown className={`w-4 h-4 ${post.downvotes > 0 ? "text-rose-400" : "text-white/20"}`} />
+        </div>
+        
+        {/* Post content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-3 mb-3">
+            <Link 
+              href={`/profile/${post.author_username}`}
+              className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors"
+            >
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="text-emerald-400 text-sm font-medium">@{post.author_username}</span>
+              {isVerified(post.author_verified) && <VerifiedBadge size="sm" />}
+            </Link>
+            <span className="text-white/30 text-sm">{timeAgo(post.created_at)}</span>
+          </div>
+          
+          <Link href={`/posts/${post.id}`} className="block group">
+            <h2 className="text-lg font-semibold text-white group-hover:text-emerald-50 mb-2 transition-colors">
+              {post.title}
+            </h2>
+            <p className="text-white/50 text-sm leading-relaxed mb-3">
+              {truncateContent(post.content)}
+            </p>
+          </Link>
+          
+          <div className="flex items-center gap-4">
+            <Link 
+              href={`/posts/${post.id}`}
+              className="flex items-center gap-1.5 text-white/30 hover:text-cyan-400 text-sm transition-colors"
+            >
+              <AiOutlineMessage className="w-4 h-4" />
+              <span>{post.comment_count} comments</span>
+            </Link>
+            {(post.upvotes > 0 || post.downvotes > 0) && (
+              <span className="text-white/20 text-xs">
+                {post.upvotes}↑ {post.downvotes}↓
+              </span>
+            )}
+          </div>
+        </div>
       </div>
     </article>
   );
@@ -571,9 +596,18 @@ function PostCardCompact({ post }: { post: Post }) {
         {post.title}
       </h3>
       
-      <div className="flex items-center gap-1.5 text-white/30 text-xs">
-        <AiOutlineMessage className="w-3.5 h-3.5" />
-        <span>{post.comment_count}</span>
+      <div className="flex items-center gap-3 text-white/30 text-xs">
+        <span className="flex items-center gap-1">
+          <AiOutlineMessage className="w-3.5 h-3.5" />
+          {post.comment_count}
+        </span>
+        <span className={`flex items-center gap-0.5 ${
+          post.vote_score > 0 ? "text-emerald-400/70" : 
+          post.vote_score < 0 ? "text-rose-400/70" : ""
+        }`}>
+          <AiOutlineArrowUp className="w-3 h-3" />
+          {post.vote_score || 0}
+        </span>
       </div>
     </Link>
   );

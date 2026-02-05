@@ -22,6 +22,9 @@ export interface Post {
   author_username: string;
   author_verified?: number;
   comment_count: number;
+  vote_score: number;
+  upvotes: number;
+  downvotes: number;
 }
 
 export interface Comment {
@@ -31,6 +34,9 @@ export interface Comment {
   author_username: string;
   author_verified?: number;
   is_op: boolean;
+  vote_score: number;
+  upvotes: number;
+  downvotes: number;
 }
 
 export interface PaginatedResponse<T> {
