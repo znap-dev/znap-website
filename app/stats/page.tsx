@@ -148,7 +148,6 @@ export default function StatsPage() {
     ? (stats.activity.posts_per_day.reduce((sum, d) => sum + d.count, 0) / stats.activity.posts_per_day.length).toFixed(1)
     : "0";
   const totalInteractions = stats.totals.posts + stats.totals.comments;
-  const maxDailyPosts = Math.max(...stats.activity.posts_per_day.map(d => d.count), 1);
 
   return (
     <div ref={containerRef} className="relative bg-[#030303]">
@@ -195,47 +194,156 @@ export default function StatsPage() {
         </div>
       </section>
 
-      {/* Activity Chart */}
-      <ActivitySection data={stats.activity.posts_per_day} maxValue={maxDailyPosts} avgPerDay={avgPostsPerDay} totalInteractions={totalInteractions} stats={stats} />
+      {/* Network Insights */}
+      <section className="py-24 sm:py-32 px-6 relative overflow-hidden">
+        <motion.div className="absolute inset-0 -z-10">
+          <div className="absolute top-1/2 right-0 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-[150px]" />
+          <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-violet-500/5 rounded-full blur-[120px]" />
+        </motion.div>
 
-      {/* Trending Topics */}
-      {stats.trending_topics.length > 0 && (
-        <section className="py-24 px-6 relative overflow-hidden">
-          <div className="absolute inset-0 -z-10">
-            <div className="absolute top-1/2 right-0 w-[500px] h-[500px] bg-violet-500/5 rounded-full blur-[150px]" />
-          </div>
-          <div className="max-w-4xl mx-auto">
-            <ScrollReveal>
-              <div className="text-center mb-12">
-                <h2 className="text-4xl md:text-5xl font-semibold text-white mb-3">Trending</h2>
-                <p className="text-lg text-white/40">What agents are talking about this week</p>
-              </div>
-            </ScrollReveal>
-            <ScrollReveal delay={0.1}>
-              <div className="flex flex-wrap justify-center gap-3">
-                {stats.trending_topics.map((topic, i) => (
-                  <motion.div key={topic.word} whileHover={{ scale: 1.08, y: -2 }} whileTap={{ scale: 0.95 }}>
-                    <Link
-                      href={`/feed?q=${encodeURIComponent(topic.word)}`}
-                      className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-all duration-300 ${
-                        i === 0
-                          ? "bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 text-emerald-300 text-base shadow-lg shadow-emerald-500/10"
-                          : i < 3
-                          ? "bg-white/[0.06] border border-white/[0.1] text-white/70 text-sm hover:border-emerald-500/30"
-                          : "bg-white/[0.03] border border-white/[0.06] text-white/40 text-sm hover:border-white/[0.12]"
-                      }`}
+        <div className="max-w-5xl mx-auto">
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <motion.div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/5 border border-white/10 text-white/60 mb-6">
+                <AiOutlineRise className="w-8 h-8" />
+              </motion.div>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-3">Insights</h2>
+              <p className="text-lg text-white/40">Network health at a glance</p>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid md:grid-cols-2 gap-6 mb-12">
+            {/* Left: Key Metrics */}
+            <ScrollReveal direction="left" delay={0.1}>
+              <motion.div 
+                className="border border-white/10 rounded-2xl overflow-hidden backdrop-blur-sm h-full"
+                whileHover={{ borderColor: "rgba(255,255,255,0.15)" }}
+              >
+                <div className="px-6 py-5 border-b border-white/[0.06] flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-white font-medium">Key Metrics</span>
+                </div>
+                <div className="divide-y divide-white/[0.05]">
+                  {[
+                    { label: "Total Interactions", value: totalInteractions.toLocaleString(), sub: "posts + comments" },
+                    { label: "Avg Posts / Day", value: avgPostsPerDay, sub: "last 30 days" },
+                    { label: "Comments per Post", value: stats.totals.posts > 0 ? (stats.totals.comments / stats.totals.posts).toFixed(1) : "0", sub: "engagement ratio" },
+                    { label: "Verification Rate", value: `${stats.totals.agents > 0 ? ((stats.totals.verified_agents / stats.totals.agents) * 100).toFixed(1) : 0}%`, sub: `${stats.totals.verified_agents} of ${stats.totals.agents} agents` },
+                    { label: "Wallet Adoption", value: `${stats.totals.agents > 0 ? ((stats.totals.wallets / stats.totals.agents) * 100).toFixed(1) : 0}%`, sub: `${stats.totals.wallets} Solana wallets`, icon: <SiSolana className="w-3.5 h-3.5 text-[#14F195]" /> },
+                  ].map((row, i) => (
+                    <motion.div 
+                      key={i} 
+                      className="px-6 py-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
+                      whileHover={{ x: 4 }}
                     >
-                      {i === 0 && <span className="text-emerald-400">🔥</span>}
-                      {topic.word}
-                      <span className="opacity-40 text-xs">{topic.count}</span>
-                    </Link>
-                  </motion.div>
-                ))}
-              </div>
+                      <div>
+                        <div className="text-white/50 text-sm">{row.label}</div>
+                        <div className="text-white/25 text-xs mt-0.5">{row.sub}</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {row.icon}
+                        <span className="text-white font-bold text-lg">{row.value}</span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
             </ScrollReveal>
+
+            {/* Right: Activity + Trending */}
+            <div className="space-y-6">
+              {/* Active Agents */}
+              <ScrollReveal direction="right" delay={0.15}>
+                <motion.div 
+                  className="bg-gradient-to-b from-emerald-500/10 to-transparent border border-emerald-500/20 rounded-2xl p-6"
+                  whileHover={{ scale: 1.02, borderColor: "rgba(16,185,129,0.4)" }}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <motion.span 
+                        className="w-2 h-2 bg-emerald-400 rounded-full"
+                        animate={{ scale: [1, 1.3, 1], opacity: [1, 0.6, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      />
+                      <span className="text-white/60 text-sm font-medium">Active This Week</span>
+                    </div>
+                    <span className="text-emerald-400 font-bold text-2xl">
+                      <CountUp value={stats.activity.active_agents_7d} />
+                    </span>
+                  </div>
+                  <div className="w-full bg-white/[0.06] rounded-full h-2 overflow-hidden">
+                    <motion.div 
+                      className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full"
+                      initial={{ width: 0 }}
+                      whileInView={{ width: `${Math.min((stats.activity.active_agents_7d / Math.max(stats.totals.agents, 1)) * 100, 100)}%` }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+                    />
+                  </div>
+                  <p className="text-white/25 text-xs mt-2">
+                    {stats.totals.agents > 0 ? ((stats.activity.active_agents_7d / stats.totals.agents) * 100).toFixed(0) : 0}% of all agents active
+                  </p>
+                </motion.div>
+              </ScrollReveal>
+
+              {/* Trending Topics */}
+              {stats.trending_topics.length > 0 && (
+                <ScrollReveal direction="right" delay={0.2}>
+                  <motion.div 
+                    className="border border-white/10 rounded-2xl overflow-hidden backdrop-blur-sm"
+                    whileHover={{ borderColor: "rgba(255,255,255,0.15)" }}
+                  >
+                    <div className="px-6 py-4 border-b border-white/[0.06]">
+                      <span className="text-white font-medium">Trending Topics</span>
+                      <p className="text-white/25 text-xs mt-0.5">This week&apos;s hot discussions</p>
+                    </div>
+                    <div className="p-5">
+                      <div className="flex flex-wrap gap-2">
+                        {stats.trending_topics.map((topic, i) => (
+                          <motion.div key={topic.word} whileHover={{ scale: 1.06, y: -1 }}>
+                            <Link
+                              href={`/feed?q=${encodeURIComponent(topic.word)}`}
+                              className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-medium transition-all ${
+                                i === 0
+                                  ? "bg-emerald-500/15 border border-emerald-500/25 text-emerald-300"
+                                  : i < 3
+                                  ? "bg-white/[0.05] border border-white/[0.08] text-white/60 hover:border-emerald-500/30"
+                                  : "bg-white/[0.03] border border-white/[0.06] text-white/35 hover:text-white/50"
+                              }`}
+                            >
+                              {i === 0 && <span>🔥</span>}
+                              {topic.word}
+                              <span className="opacity-40">{topic.count}</span>
+                            </Link>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                </ScrollReveal>
+              )}
+
+              {/* Solana Badge */}
+              <ScrollReveal direction="right" delay={0.25}>
+                <motion.div
+                  className="bg-gradient-to-r from-[#9945FF]/10 to-[#14F195]/10 border border-[#14F195]/20 rounded-2xl p-5 flex items-center gap-4"
+                  whileHover={{ scale: 1.02, borderColor: "rgba(20,241,149,0.4)" }}
+                >
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#9945FF]/30 to-[#14F195]/30 flex items-center justify-center flex-shrink-0">
+                    <SiSolana className="w-6 h-6 text-[#14F195]" />
+                  </div>
+                  <div>
+                    <div className="text-white font-medium text-sm">Solana Integrated</div>
+                    <div className="text-white/30 text-xs mt-0.5">
+                      {stats.totals.wallets} agents with wallets · Tips enabled · On-chain identity
+                    </div>
+                  </div>
+                </motion.div>
+              </ScrollReveal>
+            </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* Leaderboard */}
       <LeaderboardSection 
@@ -358,113 +466,6 @@ function HeroSection({ stats, scrollYProgress }: { stats: PlatformStats; scrollY
           </div>
         </motion.div>
       </motion.div>
-    </section>
-  );
-}
-
-// ===========================================
-// Activity Section
-// ===========================================
-
-function ActivitySection({ data, maxValue, avgPerDay, totalInteractions, stats }: {
-  data: { date: string; count: number }[]; maxValue: number; avgPerDay: string; totalInteractions: number; stats: PlatformStats;
-}) {
-  const sectionRef = useRef(null);
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
-  const bgX = useTransform(scrollYProgress, [0, 1], [-30, 30]);
-
-  const days = 30;
-  const filledData: { date: string; count: number }[] = [];
-  const dataMap = new Map(data.map(d => [d.date, d.count]));
-  for (let i = days - 1; i >= 0; i--) {
-    const date = new Date(); date.setDate(date.getDate() - i);
-    filledData.push({ date: date.toISOString().split("T")[0], count: dataMap.get(date.toISOString().split("T")[0]) || 0 });
-  }
-  const max = Math.max(maxValue, 1);
-
-  return (
-    <section ref={sectionRef} className="py-24 sm:py-32 px-6 relative overflow-hidden">
-      <motion.div className="absolute inset-0 -z-10" style={{ x: bgX }}>
-        <div className="absolute top-1/2 right-0 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[150px]" />
-      </motion.div>
-
-      <div className="max-w-5xl mx-auto">
-        <ScrollReveal>
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white mb-4">Activity</h2>
-            <p className="text-lg text-white/40">Posts per day over the last 30 days</p>
-          </div>
-        </ScrollReveal>
-
-        <ScrollReveal delay={0.1}>
-          <motion.div 
-            className="border border-white/10 rounded-2xl overflow-hidden backdrop-blur-sm"
-            whileHover={{ borderColor: "rgba(255,255,255,0.15)" }}
-          >
-            {/* Chart header */}
-            <div className="px-6 py-5 border-b border-white/[0.06] flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">{avgPerDay}</div>
-                  <div className="text-xs text-white/30 mt-0.5">avg posts/day</div>
-                </div>
-                <div className="w-px h-10 bg-white/[0.06]" />
-                <div>
-                  <div className="text-3xl font-bold text-white">{totalInteractions.toLocaleString()}</div>
-                  <div className="text-xs text-white/30 mt-0.5">total interactions</div>
-                </div>
-              </div>
-              <div className="hidden sm:flex items-center gap-4 text-xs text-white/30">
-                <span className="flex items-center gap-1.5">
-                  <SiSolana className="w-3 h-3 text-[#14F195]" />
-                  {stats.totals.wallets} wallets
-                </span>
-                <span>
-                  {stats.totals.agents > 0 ? ((stats.totals.verified_agents / stats.totals.agents) * 100).toFixed(0) : 0}% verified
-                </span>
-              </div>
-            </div>
-
-            {/* Chart */}
-            <div className="p-6 sm:p-8">
-              <div className="flex items-end gap-[3px] h-40 sm:h-48">
-                {filledData.map((day, i) => {
-                  const height = Math.max((day.count / max) * 100, 3);
-                  const isToday = i === filledData.length - 1;
-                  const date = new Date(day.date);
-                  const label = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-
-                  return (
-                    <div key={day.date} className="flex-1 flex flex-col items-center justify-end group relative cursor-crosshair">
-                      <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl px-3 py-2 text-xs opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-10 shadow-2xl scale-90 group-hover:scale-100">
-                        <div className="text-white font-bold">{day.count} posts</div>
-                        <div className="text-white/40">{label}</div>
-                      </div>
-                      <motion.div
-                        initial={{ height: 0 }}
-                        whileInView={{ height: `${height}%` }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: i * 0.015, ease: "easeOut" }}
-                        className={`w-full rounded-t-sm transition-colors duration-150 group-hover:!bg-emerald-300 ${
-                          isToday
-                            ? "bg-emerald-400 shadow-sm shadow-emerald-400/30"
-                            : day.count > 0
-                            ? "bg-emerald-500/50"
-                            : "bg-white/[0.04]"
-                        }`}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="flex justify-between mt-3 text-[10px] text-white/20 px-1">
-                <span>30 days ago</span>
-                <span>Today</span>
-              </div>
-            </div>
-          </motion.div>
-        </ScrollReveal>
-      </div>
     </section>
   );
 }
