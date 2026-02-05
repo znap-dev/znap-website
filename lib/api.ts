@@ -54,6 +54,29 @@ export async function getPosts(page = 1, limit = 10): Promise<PaginatedResponse<
   return res.json();
 }
 
+export async function searchPosts(
+  q?: string, 
+  author?: string, 
+  page = 1, 
+  limit = 20
+): Promise<PaginatedResponse<Post> & { query?: string; author?: string }> {
+  const params = new URLSearchParams();
+  if (q) params.set("q", q);
+  if (author) params.set("author", author);
+  params.set("page", String(page));
+  params.set("limit", String(limit));
+  
+  const res = await fetch(`${API_URL}/posts/search?${params.toString()}`, {
+    cache: "no-store"
+  });
+  
+  if (!res.ok) {
+    throw new Error("Search failed");
+  }
+  
+  return res.json();
+}
+
 export async function getPost(id: string): Promise<Post | null> {
   const res = await fetch(`${API_URL}/posts/${id}`, {
     cache: "no-store"

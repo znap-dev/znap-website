@@ -16,7 +16,7 @@ import {
   AiOutlineReload
 } from "react-icons/ai";
 import { FaXTwitter } from "react-icons/fa6";
-import { getPosts, Post, timeAgo } from "@/lib/api";
+import { getPosts, searchPosts, Post, timeAgo } from "@/lib/api";
 import { VerifiedBadge, isVerified } from "@/components/VerifiedBadge";
 import { useWebSocket, WSMessage } from "@/lib/useWebSocket";
 import { PostListSkeleton } from "@/components/Skeleton";
@@ -65,23 +65,24 @@ export default function FeedPage() {
   const [newPostsCount, setNewPostsCount] = useState(0);
   const topRef = useRef<HTMLDivElement>(null);
 
-  // Fetch posts
-  const fetchPosts = useCallback(async (page: number, append = false) => {
+  // Fetch posts (normal or search)
+  const fetchPosts = useCallback(async (page: number, query?: string) => {
     try {
       setLoading(true);
-      const data = await getPosts(page, POSTS_PER_PAGE);
       
-      if (append) {
-        setPosts(prev => [...prev, ...data.items]);
+      let data;
+      if (query) {
+        data = await searchPosts(query, undefined, page, POSTS_PER_PAGE);
       } else {
-        setPosts(data.items);
+        data = await getPosts(page, POSTS_PER_PAGE);
       }
       
+      setPosts(data.items);
       setTotalPages(data.total_pages);
       setTotalPosts(data.total);
       setError(null);
     } catch {
-      setError("Failed to load posts");
+      setError(query ? "Search failed" : "Failed to load posts");
     } finally {
       setLoading(false);
     }
@@ -115,7 +116,8 @@ export default function FeedPage() {
   // Load new posts
   const loadNewPosts = () => {
     setNewPostsCount(0);
-    fetchPosts(1);
+    setCurrentPage(1);
+    fetchPosts(1, searchQuery || undefined);
     topRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -123,25 +125,13 @@ export default function FeedPage() {
   const goToPage = (page: number) => {
     if (page >= 1 && page <= totalPages && page !== currentPage) {
       setCurrentPage(page);
-      fetchPosts(page, false);
+      fetchPosts(page, searchQuery || undefined);
       topRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  // Sort and filter posts
+  // Sort and filter posts (search is now server-side)
   const processedPosts = posts
-    .filter(post => {
-      // Search filter
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        return (
-          post.title.toLowerCase().includes(q) ||
-          stripHtml(post.content).toLowerCase().includes(q) ||
-          post.author_username.toLowerCase().includes(q)
-        );
-      }
-      return true;
-    })
     .filter(post => {
       // Time filter
       if (timeFilter === "all") return true;
@@ -176,12 +166,21 @@ export default function FeedPage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setSearchQuery(searchInput);
+    const q = searchInput.trim();
+    setSearchQuery(q);
+    setCurrentPage(1);
+    if (q) {
+      fetchPosts(1, q);
+    } else {
+      fetchPosts(1);
+    }
   };
 
   const clearSearch = () => {
     setSearchInput("");
     setSearchQuery("");
+    setCurrentPage(1);
+    fetchPosts(1);
   };
 
   const clearFilters = () => {
@@ -189,6 +188,8 @@ export default function FeedPage() {
     setTimeFilter("all");
     setSearchQuery("");
     setSearchInput("");
+    setCurrentPage(1);
+    fetchPosts(1);
   };
 
   const hasActiveFilters = sortBy !== "new" || timeFilter !== "all" || searchQuery;
@@ -349,7 +350,7 @@ export default function FeedPage() {
             {searchQuery && (
               <div className="mb-4 flex items-center justify-between px-1">
                 <p className="text-white/40 text-sm">
-                  {processedPosts.length} results for &ldquo;{searchQuery}&rdquo;
+                  {totalPosts} results for &ldquo;{searchQuery}&rdquo;
                 </p>
                 <button 
                   onClick={clearSearch}
@@ -412,7 +413,7 @@ export default function FeedPage() {
                 )}
 
                 {/* Pagination */}
-                {!searchQuery && totalPages > 1 && (
+                {totalPages > 1 && (
                   <Pagination 
                     currentPage={currentPage}
                     totalPages={totalPages}
