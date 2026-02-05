@@ -168,20 +168,30 @@ export default function PostPage() {
                   dangerouslySetInnerHTML={{ __html: post.content }}
                 />
                 
-                <div className="flex items-center justify-between gap-4 mt-6 pt-3 border-t border-white/[0.06]">
-                  <span className="flex items-center gap-1.5 text-white/50 text-sm">
-                    <AiOutlineMessage className="w-4 h-4" />
-                    {totalComments} comments
-                  </span>
-                  <span className={`flex items-center gap-1.5 text-sm ${
-                    post.vote_score > 0 ? "text-emerald-400" : 
-                    post.vote_score < 0 ? "text-rose-400" : 
-                    "text-white/50"
-                  }`}>
-                    <AiOutlineArrowUp className="w-4 h-4" />
-                    {post.vote_score || 0} votes
-                    {post.upvotes > 0 && <span className="text-white/30 text-xs">({post.upvotes}↑ {post.downvotes}↓)</span>}
-                  </span>
+                <div className="flex items-center justify-between gap-4 mt-6 pt-4 border-t border-white/[0.06]">
+                  <div className="flex items-center gap-4">
+                    {/* Vote pill */}
+                    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
+                      (post.vote_score || 0) > 0 
+                        ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
+                        : (post.vote_score || 0) < 0
+                        ? "bg-rose-500/10 border border-rose-500/20 text-rose-400"
+                        : "bg-white/[0.04] border border-white/[0.08] text-white/40"
+                    }`}>
+                      <AiOutlineArrowUp className="w-4 h-4" />
+                      <span className="font-bold">{post.vote_score || 0}</span>
+                      {((post.upvotes || 0) > 0 || (post.downvotes || 0) > 0) && (
+                        <span className="text-xs opacity-60 ml-0.5">
+                          ({post.upvotes || 0}↑ {post.downvotes || 0}↓)
+                        </span>
+                      )}
+                    </div>
+                    
+                    <span className="flex items-center gap-1.5 text-white/50 text-sm">
+                      <AiOutlineMessage className="w-4 h-4" />
+                      {totalComments} comments
+                    </span>
+                  </div>
                   <ShareButton title={post.title} />
                 </div>
               </div>
@@ -206,33 +216,47 @@ export default function PostPage() {
                 </div>
 
                 <div className="bg-[#111113] border border-white/[0.06] rounded-md overflow-hidden divide-y divide-white/[0.04]">
-                  {comments.map((comment) => (
-                    <div key={comment.id} className="p-4">
-                      <div className="flex items-center gap-2 text-xs mb-2">
-                        <Link href={`/profile/${comment.author_username}`} className="flex items-center gap-1.5 text-cyan-400 font-medium hover:underline">
-                          @{comment.author_username}
-                          {isVerified(comment.author_verified) && <VerifiedBadge size="sm" />}
-                        </Link>
-                        {comment.is_op && (
-                          <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">OP</span>
-                        )}
-                        <span className="text-white/30">•</span>
-                        <span className="text-white/30">{timeAgo(comment.created_at)}</span>
-                        {comment.vote_score !== 0 && (
-                          <span className={`flex items-center gap-0.5 ${
-                            comment.vote_score > 0 ? "text-emerald-400/70" : "text-rose-400/70"
-                          }`}>
-                            <AiOutlineArrowUp className="w-3 h-3" />
-                            {comment.vote_score}
-                          </span>
-                        )}
+                  {comments.map((comment) => {
+                    const cScore = comment.vote_score || 0;
+                    return (
+                      <div key={comment.id} className="p-4 hover:bg-white/[0.01] transition-colors">
+                        <div className="flex items-start gap-3">
+                          {/* Comment vote mini */}
+                          {cScore !== 0 && (
+                            <div className={`flex flex-col items-center pt-0.5 flex-shrink-0 ${
+                              cScore > 0 ? "text-emerald-400" : "text-rose-400"
+                            }`}>
+                              <AiOutlineArrowUp className="w-3.5 h-3.5" />
+                              <span className="text-xs font-bold">{cScore}</span>
+                            </div>
+                          )}
+                          
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center flex-wrap gap-2 text-xs mb-2">
+                              <Link href={`/profile/${comment.author_username}`} className="flex items-center gap-1.5 text-cyan-400 font-medium hover:underline">
+                                @{comment.author_username}
+                                {isVerified(comment.author_verified) && <VerifiedBadge size="sm" />}
+                              </Link>
+                              {comment.is_op && (
+                                <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded">OP</span>
+                              )}
+                              <span className="text-white/30">•</span>
+                              <span className="text-white/30">{timeAgo(comment.created_at)}</span>
+                              {((comment.upvotes || 0) > 0 || (comment.downvotes || 0) > 0) && (
+                                <span className="text-white/15 text-[10px]">
+                                  {comment.upvotes || 0}↑ {comment.downvotes || 0}↓
+                                </span>
+                              )}
+                            </div>
+                            <div 
+                              className="text-sm text-white/75 leading-relaxed prose prose-invert prose-sm max-w-none prose-p:my-2 prose-code:text-emerald-400 prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10"
+                              dangerouslySetInnerHTML={{ __html: comment.content }}
+                            />
+                          </div>
+                        </div>
                       </div>
-                      <div 
-                        className="text-sm text-white/75 leading-relaxed prose prose-invert prose-sm max-w-none prose-p:my-2 prose-code:text-emerald-400 prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10"
-                        dangerouslySetInnerHTML={{ __html: comment.content }}
-                      />
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {totalPages > 1 && (

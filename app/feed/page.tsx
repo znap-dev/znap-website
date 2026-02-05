@@ -515,23 +515,60 @@ export default function FeedPage() {
   );
 }
 
+// Vote Badge Component
+function VoteBadge({ score, upvotes, downvotes, size = "md" }: { 
+  score: number; upvotes: number; downvotes: number; size?: "sm" | "md" 
+}) {
+  const isPositive = score > 0;
+  const isNegative = score < 0;
+  const hasVotes = upvotes > 0 || downvotes > 0;
+  
+  if (size === "sm") {
+    return (
+      <span className={`inline-flex items-center gap-1 text-xs font-medium ${
+        isPositive ? "text-emerald-400" : isNegative ? "text-rose-400" : "text-white/30"
+      }`}>
+        <AiOutlineArrowUp className="w-3 h-3" />
+        {score}
+      </span>
+    );
+  }
+  
+  return (
+    <div className={`flex flex-col items-center gap-0.5 py-2 px-1.5 rounded-xl transition-colors flex-shrink-0 ${
+      isPositive ? "bg-emerald-500/[0.08]" : isNegative ? "bg-rose-500/[0.08]" : "bg-white/[0.02]"
+    }`}>
+      <div className={`p-1 rounded-lg transition-colors ${
+        isPositive ? "text-emerald-400" : "text-white/15 hover:text-white/30"
+      }`}>
+        <AiOutlineArrowUp className="w-4 h-4" />
+      </div>
+      <span className={`text-sm font-bold tabular-nums min-w-[20px] text-center ${
+        isPositive ? "text-emerald-400" : isNegative ? "text-rose-400" : "text-white/25"
+      }`}>
+        {score}
+      </span>
+      <div className={`p-1 rounded-lg transition-colors ${
+        isNegative ? "text-rose-400" : "text-white/15 hover:text-white/30"
+      }`}>
+        <AiOutlineArrowDown className="w-4 h-4" />
+      </div>
+      {hasVotes && (
+        <span className="text-[9px] text-white/20 tabular-nums mt-0.5">
+          {upvotes}/{downvotes}
+        </span>
+      )}
+    </div>
+  );
+}
+
 // Post Card Component
 function PostCard({ post }: { post: Post }) {
   return (
     <article className="p-5 hover:bg-white/[0.02] transition-colors">
       <div className="flex gap-4">
-        {/* Vote indicator */}
-        <div className="flex flex-col items-center gap-0.5 pt-1 flex-shrink-0">
-          <AiOutlineArrowUp className={`w-4 h-4 ${post.upvotes > 0 ? "text-emerald-400" : "text-white/20"}`} />
-          <span className={`text-sm font-bold ${
-            post.vote_score > 0 ? "text-emerald-400" : 
-            post.vote_score < 0 ? "text-rose-400" : 
-            "text-white/30"
-          }`}>
-            {post.vote_score || 0}
-          </span>
-          <AiOutlineArrowDown className={`w-4 h-4 ${post.downvotes > 0 ? "text-rose-400" : "text-white/20"}`} />
-        </div>
+        {/* Vote column */}
+        <VoteBadge score={post.vote_score || 0} upvotes={post.upvotes || 0} downvotes={post.downvotes || 0} />
         
         {/* Post content */}
         <div className="flex-1 min-w-0">
@@ -564,11 +601,6 @@ function PostCard({ post }: { post: Post }) {
               <AiOutlineMessage className="w-4 h-4" />
               <span>{post.comment_count} comments</span>
             </Link>
-            {(post.upvotes > 0 || post.downvotes > 0) && (
-              <span className="text-white/20 text-xs">
-                {post.upvotes}↑ {post.downvotes}↓
-              </span>
-            )}
           </div>
         </div>
       </div>
@@ -578,18 +610,35 @@ function PostCard({ post }: { post: Post }) {
 
 // Compact Post Card Component
 function PostCardCompact({ post }: { post: Post }) {
+  const score = post.vote_score || 0;
   return (
     <Link 
       href={`/posts/${post.id}`}
-      className="block bg-[#111113] border border-white/[0.06] rounded-lg p-4 hover:border-white/[0.12] hover:bg-white/[0.02] transition-colors group"
+      className={`block bg-[#111113] border rounded-lg p-4 hover:bg-white/[0.02] transition-all group ${
+        score > 5 
+          ? "border-emerald-500/15 hover:border-emerald-500/30" 
+          : "border-white/[0.06] hover:border-white/[0.12]"
+      }`}
     >
-      <div className="flex items-center gap-2 mb-2">
-        <span className="flex items-center gap-1 text-emerald-400 text-xs">
-          @{post.author_username}
-          {isVerified(post.author_verified) && <VerifiedBadge size="sm" />}
-        </span>
-        <span className="text-white/20">•</span>
-        <span className="text-white/30 text-xs">{timeAgo(post.created_at)}</span>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <span className="flex items-center gap-1 text-emerald-400 text-xs">
+            @{post.author_username}
+            {isVerified(post.author_verified) && <VerifiedBadge size="sm" />}
+          </span>
+          <span className="text-white/20">•</span>
+          <span className="text-white/30 text-xs">{timeAgo(post.created_at)}</span>
+        </div>
+        {score !== 0 && (
+          <span className={`flex items-center gap-0.5 text-xs font-bold px-1.5 py-0.5 rounded-md ${
+            score > 0 
+              ? "text-emerald-400 bg-emerald-500/10" 
+              : "text-rose-400 bg-rose-500/10"
+          }`}>
+            <AiOutlineArrowUp className="w-3 h-3" />
+            {score}
+          </span>
+        )}
       </div>
       
       <h3 className="font-medium text-white group-hover:text-emerald-50 mb-2 line-clamp-2 transition-colors">
@@ -600,13 +649,6 @@ function PostCardCompact({ post }: { post: Post }) {
         <span className="flex items-center gap-1">
           <AiOutlineMessage className="w-3.5 h-3.5" />
           {post.comment_count}
-        </span>
-        <span className={`flex items-center gap-0.5 ${
-          post.vote_score > 0 ? "text-emerald-400/70" : 
-          post.vote_score < 0 ? "text-rose-400/70" : ""
-        }`}>
-          <AiOutlineArrowUp className="w-3 h-3" />
-          {post.vote_score || 0}
         </span>
       </div>
     </Link>
