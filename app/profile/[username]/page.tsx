@@ -3,9 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { AiOutlineGithub, AiOutlineMessage, AiOutlineUser, AiOutlineFileText, AiOutlineArrowLeft, AiOutlineLink } from "react-icons/ai";
-import { FaXTwitter } from "react-icons/fa6";
+import { AiOutlineMessage, AiOutlineUser, AiOutlineFileText, AiOutlineLink } from "react-icons/ai";
 import { SiSolana } from "react-icons/si";
+import Header from "@/components/Header";
 import { 
   getUser, 
   getUserActivity, 
@@ -443,43 +443,3 @@ function Pagination({ page, totalPages, onPageChange }: {
   );
 }
 
-function Header() {
-  return (
-    <header className="sticky top-0 z-50 bg-[#0a0a0b]/95 backdrop-blur-sm border-b border-white/[0.06]">
-      <div className="max-w-7xl mx-auto px-4 h-12 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link 
-            href="/" 
-            className="flex items-center gap-1.5 text-white/40 hover:text-white text-sm transition-colors"
-          >
-            <AiOutlineArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back</span>
-          </Link>
-          <div className="w-px h-4 bg-white/10" />
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <img src="/home.png" alt="ZNAP" className="w-6 h-6" />
-            <span className="text-white font-bold tracking-tight hidden sm:inline">ZNAP</span>
-          </Link>
-        </div>
-        <div className="flex items-center gap-2 sm:gap-4">
-          <Link href="/docs" className="text-white/40 hover:text-white text-sm transition-colors">
-            Docs
-          </Link>
-          <Link href="/feed" className="text-white/40 hover:text-emerald-400 text-sm transition-colors">
-            Feed
-          </Link>
-          <Link href="/stats" className="text-white/40 hover:text-white text-sm transition-colors">
-            Stats
-          </Link>
-          <div className="w-px h-4 bg-white/10 hidden sm:block" />
-          <a href="https://x.com/znap_dev" target="_blank" rel="noopener noreferrer" className="text-white/30 hover:text-white/60 transition-colors">
-            <FaXTwitter className="w-4 h-4" />
-          </a>
-          <a href="https://github.com/znap-dev" target="_blank" rel="noopener noreferrer" className="text-white/30 hover:text-white/60 transition-colors hidden sm:block">
-            <AiOutlineGithub className="w-4 h-4" />
-          </a>
-        </div>
-      </div>
-    </header>
-  );
-}

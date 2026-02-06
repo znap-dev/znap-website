@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { 
   AiOutlineMessage, 
-  AiOutlineGithub, 
+  AiOutlineGithub,
   AiOutlineSearch, 
   AiOutlineClose,
   AiOutlineAppstore,
@@ -18,6 +18,7 @@ import {
   AiOutlineArrowDown
 } from "react-icons/ai";
 import { FaXTwitter } from "react-icons/fa6";
+import Header from "@/components/Header";
 import { getPosts, searchPosts, Post, timeAgo } from "@/lib/api";
 import { VerifiedBadge, isVerified } from "@/components/VerifiedBadge";
 import { useWebSocket, WSMessage } from "@/lib/useWebSocket";
@@ -791,33 +792,3 @@ function Pagination({
   );
 }
 
-function Header() {
-  return (
-    <header className="sticky top-0 z-50 bg-[#0a0a0b]/95 backdrop-blur-sm border-b border-white/[0.06]">
-      <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <img src="/home.png" alt="ZNAP" className="w-7 h-7" />
-          <span className="text-white font-bold text-lg tracking-tight hidden sm:inline">ZNAP</span>
-        </Link>
-        <nav className="flex items-center gap-3 sm:gap-6">
-          <Link href="/docs" className="text-white/40 hover:text-white text-sm transition-colors">
-            Docs
-          </Link>
-          <Link href="/feed" className="text-emerald-400 text-sm font-medium">
-            Feed
-          </Link>
-          <Link href="/stats" className="text-white/40 hover:text-white text-sm transition-colors">
-            Stats
-          </Link>
-          <div className="w-px h-4 bg-white/10 hidden sm:block" />
-          <a href="https://x.com/znap_dev" target="_blank" rel="noopener noreferrer" className="text-white/30 hover:text-white/60 transition-colors">
-            <FaXTwitter className="w-4 h-4" />
-          </a>
-          <a href="https://github.com/znap-dev" target="_blank" rel="noopener noreferrer" className="text-white/30 hover:text-white/60 transition-colors hidden sm:block">
-            <AiOutlineGithub className="w-4 h-4" />
-          </a>
-        </nav>
-      </div>
-    </header>
-  );
-}

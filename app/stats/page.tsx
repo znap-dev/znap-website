@@ -2,20 +2,18 @@
 
 import { useState, useEffect, useRef, ReactNode } from "react";
 import Link from "next/link";
-import { motion, useScroll, useTransform, useInView, MotionValue } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { 
-  AiOutlineGithub, 
   AiOutlineUser, 
   AiOutlineFileText, 
   AiOutlineMessage, 
-  AiOutlineArrowLeft,
   AiOutlineCrown,
   AiOutlineThunderbolt,
   AiOutlineSafety,
   AiOutlineWallet,
   AiOutlineArrowRight
 } from "react-icons/ai";
-import { FaXTwitter } from "react-icons/fa6";
+import Header from "@/components/Header";
 import { SiSolana } from "react-icons/si";
 import { 
   getStats, 
@@ -76,7 +74,6 @@ function CountUp({ value, duration = 1.2 }: { value: number; duration?: number }
 type Period = "all" | "week" | "month";
 
 export default function StatsPage() {
-  const { scrollYProgress } = useScroll();
   const [stats, setStats] = useState<PlatformStats | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [period, setPeriod] = useState<Period>("all");
@@ -103,8 +100,8 @@ export default function StatsPage() {
 
   if (loading) return (
     <div className="bg-[#030303] min-h-screen">
-      <Header scrollYProgress={scrollYProgress} />
-      <div className="flex items-center justify-center min-h-[80vh]">
+      <Header />
+        <div className="flex items-center justify-center min-h-[80vh]">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
           <p className="text-white/25 text-xs">Loading stats...</p>
@@ -115,8 +112,8 @@ export default function StatsPage() {
 
   if (!stats) return (
     <div className="bg-[#030303] min-h-screen">
-      <Header scrollYProgress={scrollYProgress} />
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <Header />
+        <div className="flex items-center justify-center min-h-[60vh]">
         <p className="text-white/30 text-sm">Failed to load stats</p>
       </div>
     </div>
@@ -131,8 +128,7 @@ export default function StatsPage() {
 
   return (
     <div className="bg-[#030303] min-h-screen">
-      <motion.div className="fixed top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 to-cyan-500 origin-left z-[100]" style={{ scaleX: scrollYProgress }} />
-      <Header scrollYProgress={scrollYProgress} />
+      <Header />
 
       {/* === HERO === */}
       <section className="relative pt-24 pb-8 sm:pt-32 sm:pb-12 px-4 sm:px-6 overflow-hidden">
@@ -372,7 +368,12 @@ export default function StatsPage() {
         </div>
       </section>
 
-      <Footer />
+      <footer className="py-8 px-4 border-t border-white/[0.04]">
+        <div className="flex items-center justify-center gap-2">
+          <img src="/home.png" alt="ZNAP" className="w-4 h-4 opacity-25" />
+          <span className="text-white/15 text-xs">ZNAP</span>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -436,57 +437,3 @@ function RankBadge({ rank }: { rank: number }) {
   );
 }
 
-function Header({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
-  const bg = useTransform(scrollYProgress, [0, 0.03], ["rgba(3,3,3,0)", "rgba(3,3,3,0.85)"]);
-  const blur = useTransform(scrollYProgress, [0, 0.03], ["blur(0px)", "blur(12px)"]);
-
-  return (
-    <motion.header className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-3 sm:py-4"
-      style={{ backgroundColor: bg, backdropFilter: blur }}>
-      <div className="max-w-5xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-1.5 text-white/35 hover:text-white text-sm transition-colors">
-            <AiOutlineArrowLeft className="w-4 h-4" />
-          </Link>
-          <Link href="/" className="flex items-center gap-2">
-            <img src="/home.png" alt="ZNAP" className="w-5 h-5 sm:w-6 sm:h-6" />
-            <span className="text-white font-semibold text-sm hidden sm:inline">ZNAP</span>
-          </Link>
-        </div>
-        <nav className="flex items-center gap-3 sm:gap-4">
-          <Link href="/docs" className="text-white/30 hover:text-white text-xs sm:text-sm transition-colors">Docs</Link>
-          <Link href="/feed" className="text-white/30 hover:text-emerald-400 text-xs sm:text-sm transition-colors">Feed</Link>
-          <Link href="/stats" className="text-emerald-400 text-xs sm:text-sm font-medium">Stats</Link>
-          <div className="w-px h-3 bg-white/10 hidden sm:block" />
-          <a href="https://x.com/znap_dev" target="_blank" rel="noopener noreferrer" className="text-white/20 hover:text-white/40 transition-colors hidden sm:block">
-            <FaXTwitter className="w-3.5 h-3.5" />
-          </a>
-          <a href="https://github.com/znap-dev" target="_blank" rel="noopener noreferrer" className="text-white/20 hover:text-white/40 transition-colors hidden sm:block">
-            <AiOutlineGithub className="w-3.5 h-3.5" />
-          </a>
-        </nav>
-      </div>
-    </motion.header>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="py-8 px-4 border-t border-white/[0.04]">
-      <div className="max-w-5xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <img src="/home.png" alt="ZNAP" className="w-4 h-4 opacity-25" />
-          <span className="text-white/15 text-xs">ZNAP</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <a href="https://x.com/znap_dev" target="_blank" rel="noopener noreferrer" className="text-white/15 hover:text-white/30 transition-colors">
-            <FaXTwitter className="w-3.5 h-3.5" />
-          </a>
-          <a href="https://github.com/znap-dev" target="_blank" rel="noopener noreferrer" className="text-white/15 hover:text-white/30 transition-colors">
-            <AiOutlineGithub className="w-3.5 h-3.5" />
-          </a>
-        </div>
-      </div>
-    </footer>
-  );
-}
