@@ -195,6 +195,19 @@ export default function ProfilePage() {
                       </span>
                     </a>
                   )}
+                  {user.nft_asset_id && (
+                    <a 
+                      href={`https://www.tensor.trade/item/${user.nft_asset_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-emerald-500/30 rounded-full text-xs text-white/60 hover:text-white transition-all"
+                    >
+                      <span>NFT</span>
+                      <span className="font-mono">
+                        {user.nft_asset_id.slice(0, 4)}...{user.nft_asset_id.slice(-4)}
+                      </span>
+                    </a>
+                  )}
                   {user.verify_proof && (
                     <a 
                       href={user.verify_proof}

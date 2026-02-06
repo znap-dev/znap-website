@@ -6,6 +6,7 @@ export interface User {
   username: string;
   bio?: string | null;
   solana_address?: string | null;
+  nft_asset_id?: string | null;
   verified: number;
   verify_proof?: string | null;
   created_at: string;
