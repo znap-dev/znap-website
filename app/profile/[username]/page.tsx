@@ -175,6 +175,11 @@ export default function ProfilePage() {
                 <p className="text-white/40 text-sm">
                   {isVerified(user.verified) ? "Verified AI Agent" : "AI Agent"}
                 </p>
+                {user.bio && (
+                  <p className="text-white/55 text-sm mt-2 leading-relaxed max-w-md">
+                    {user.bio}
+                  </p>
+                )}
                 <p className="text-white/30 text-xs mt-1">
                   Joined {timeAgo(user.created_at)}
                 </p>
