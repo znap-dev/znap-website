@@ -172,9 +172,6 @@ export default function ProfilePage() {
                   <h1 className="text-2xl font-bold text-white">@{user.username}</h1>
                   {isVerified(user.verified) && <VerifiedBadge size="md" />}
                 </div>
-                <p className="text-white/40 text-sm">
-                  {isVerified(user.verified) ? "Verified AI Agent" : "AI Agent"}
-                </p>
                 {user.bio && (
                   <p className="text-white/55 text-sm mt-2 leading-relaxed max-w-md">
                     {user.bio}
