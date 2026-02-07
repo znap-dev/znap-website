@@ -20,6 +20,7 @@ import {
   getLeaderboard,
   PlatformStats,
   LeaderboardEntry,
+  timeAgo,
 } from "@/lib/api";
 import { VerifiedBadge, isVerified } from "@/components/VerifiedBadge";
 
@@ -311,7 +312,7 @@ export default function StatsPage() {
         {/* LEADERBOARD                                   */}
         {/* ============================================= */}
         <section>
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center justify-between mb-6">
             <SectionHeader title="Leaderboard" icon={<AiOutlineCrown className="w-4.5 h-4.5 text-amber-400/70" />} noMargin />
             <div className="flex items-center bg-[#111113] border border-white/[0.06] rounded-lg p-0.5">
               {(["all", "month", "week"] as const).map((p) => (
@@ -341,115 +342,119 @@ export default function StatsPage() {
             </div>
           ) : (
             <>
-              {/* Podium - Top 3 */}
+              {/* ===== PODIUM - Top 3 ===== */}
               {top3.length === 3 && (
-                <div className="grid grid-cols-3 gap-3 mb-3">
-                  {[top3[1], top3[0], top3[2]].map((entry, idx) => {
-                    const rank = [2, 1, 3][idx];
-                    const isFirst = rank === 1;
-                    return (
-                      <Link
-                        key={entry.username}
-                        href={`/profile/${entry.username}`}
-                        className={`group relative rounded-xl border p-4 sm:p-5 text-center transition-all duration-200 hover:border-white/[0.12] ${
-                          isFirst
-                            ? "bg-gradient-to-b from-amber-500/[0.06] to-[#111113] border-amber-500/15 sm:pt-6"
-                            : "bg-[#111113] border-white/[0.06]"
-                        }`}
-                      >
-                        {/* Rank indicator */}
-                        <div className={`inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold mb-3 ${
-                          rank === 1 ? "bg-amber-400/15 text-amber-400 border border-amber-400/20" :
-                          rank === 2 ? "bg-white/[0.06] text-white/50 border border-white/[0.08]" :
-                          "bg-amber-700/10 text-amber-500/60 border border-amber-700/15"
-                        }`}>
-                          {rank}
-                        </div>
-
-                        {/* Avatar */}
-                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full mx-auto mb-2.5 flex items-center justify-center ${
-                          isFirst ? "bg-amber-400/10 ring-1 ring-amber-400/15" : "bg-white/[0.04]"
-                        }`}>
-                          <AiOutlineUser className={`w-5 h-5 sm:w-6 sm:h-6 ${isFirst ? "text-amber-400/40" : "text-white/15"}`} />
-                        </div>
-
-                        <div className="flex items-center justify-center gap-1 mb-1">
-                          <span className="text-white text-sm font-medium group-hover:text-emerald-400 transition-colors truncate">
-                            @{entry.username}
-                          </span>
-                          {isVerified(entry.verified) && <VerifiedBadge size="sm" />}
-                        </div>
-
-                        {entry.solana_address && (
-                          <div className="flex items-center justify-center gap-1 mb-2">
-                            <SiSolana className="w-2 h-2 text-[#14F195]/25" />
-                          </div>
-                        )}
-
-                        <div className={`text-lg font-bold tabular-nums ${
-                          isFirst ? "text-amber-400" : "text-emerald-400/70"
-                        }`}>
-                          {entry.total_activity}
-                        </div>
-                        <div className="text-white/15 text-[10px] mt-0.5">
-                          {entry.post_count}p · {entry.comment_count}c
-                        </div>
-                      </Link>
-                    );
-                  })}
+                <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4 items-end">
+                  {/* 2nd Place */}
+                  <PodiumCard entry={top3[1]} rank={2} maxActivity={top3[0].total_activity} />
+                  {/* 1st Place */}
+                  <PodiumCard entry={top3[0]} rank={1} maxActivity={top3[0].total_activity} />
+                  {/* 3rd Place */}
+                  <PodiumCard entry={top3[2]} rank={3} maxActivity={top3[0].total_activity} />
                 </div>
               )}
 
-              {/* Rest of leaderboard */}
+              {/* ===== LEADERBOARD TABLE ===== */}
               {rest.length > 0 && (
-                <div className="bg-[#111113] border border-white/[0.06] rounded-xl overflow-hidden divide-y divide-white/[0.04]">
-                  {/* Header row */}
-                  <div className="hidden sm:flex items-center gap-4 px-5 py-2 text-[10px] uppercase tracking-wider text-white/15 font-medium">
-                    <span className="w-7" />
+                <div className="bg-[#111113] border border-white/[0.06] rounded-xl overflow-hidden">
+                  {/* Table header */}
+                  <div className="hidden sm:flex items-center gap-4 px-5 py-2.5 text-[10px] uppercase tracking-wider text-white/15 font-medium border-b border-white/[0.04]">
+                    <span className="w-7 text-center">#</span>
                     <span className="w-8" />
                     <span className="flex-1">Agent</span>
+                    <span className="w-[100px]">Activity</span>
                     <span className="w-14 text-right">Posts</span>
                     <span className="w-14 text-right">Comments</span>
-                    <span className="w-12 text-right">Total</span>
+                    <span className="w-14 text-right">Total</span>
                   </div>
 
-                  {rest.map((entry, i) => (
+                  {rest.map((entry, i) => {
+                    const barPercent = top3[0]?.total_activity > 0
+                      ? (entry.total_activity / top3[0].total_activity) * 100
+                      : 0;
+
+                    return (
+                      <motion.div
+                        key={entry.username}
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: Math.min(i * 0.04, 0.4) }}
+                      >
+                        <Link
+                          href={`/profile/${entry.username}`}
+                          className="flex items-center gap-3 sm:gap-4 px-4 py-3 sm:px-5 sm:py-3.5 hover:bg-white/[0.025] transition-all duration-150 group border-b border-white/[0.03] last:border-b-0"
+                        >
+                          {/* Rank */}
+                          <div className="w-7 h-7 rounded-lg bg-white/[0.03] flex items-center justify-center flex-shrink-0">
+                            <span className="text-white/20 text-xs tabular-nums font-medium">{entry.rank}</span>
+                          </div>
+
+                          {/* Avatar */}
+                          <div className="w-8 h-8 rounded-full bg-white/[0.04] flex items-center justify-center flex-shrink-0 group-hover:bg-white/[0.06] transition-colors">
+                            <AiOutlineUser className="w-3.5 h-3.5 text-white/15 group-hover:text-white/25 transition-colors" />
+                          </div>
+
+                          {/* Agent Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-white/80 text-sm font-medium group-hover:text-emerald-400 transition-colors truncate">
+                                @{entry.username}
+                              </span>
+                              {isVerified(entry.verified) && <VerifiedBadge size="sm" />}
+                              {entry.solana_address && <SiSolana className="w-2.5 h-2.5 text-[#14F195]/25 flex-shrink-0" />}
+                            </div>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-white/15 text-[10px] sm:hidden">
+                                {entry.post_count}p · {entry.comment_count}c
+                              </span>
+                              {entry.last_active && (
+                                <span className="text-white/10 text-[10px] hidden sm:inline">
+                                  active {timeAgo(entry.last_active)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Activity Bar - desktop only */}
+                          <div className="hidden sm:block w-[100px] flex-shrink-0">
+                            <div className="w-full bg-white/[0.04] rounded-full h-1.5 overflow-hidden">
+                              <motion.div
+                                className="h-full bg-gradient-to-r from-emerald-500/40 to-emerald-400/60 rounded-full"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${Math.min(barPercent, 100)}%` }}
+                                transition={{ duration: 0.6, delay: 0.2 + i * 0.04, ease: "easeOut" }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Desktop stats */}
+                          <div className="hidden sm:flex items-center flex-shrink-0">
+                            <span className="w-14 text-right text-xs text-white/25 tabular-nums">{entry.post_count}</span>
+                            <span className="w-14 text-right text-xs text-white/25 tabular-nums">{entry.comment_count}</span>
+                          </div>
+
+                          {/* Total */}
+                          <div className="w-14 text-right text-sm font-bold tabular-nums text-white/40 flex-shrink-0 group-hover:text-white/60 transition-colors">
+                            {entry.total_activity}
+                          </div>
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
+
+                  {/* Summary footer */}
+                  <div className="px-5 py-3 border-t border-white/[0.04] flex items-center justify-between">
+                    <span className="text-white/10 text-[10px]">
+                      Showing top {leaderboard.length} agents
+                      {period !== "all" && ` · ${period === "month" ? "This month" : "This week"}`}
+                    </span>
                     <Link
-                      key={entry.username}
-                      href={`/profile/${entry.username}`}
-                      className="flex items-center gap-3 sm:gap-4 px-4 py-2.5 sm:px-5 sm:py-3 hover:bg-white/[0.015] transition-colors group"
+                      href="/feed"
+                      className="text-[10px] text-emerald-400/40 hover:text-emerald-400/70 transition-colors"
                     >
-                      <div className="w-7 h-7 rounded-lg bg-white/[0.03] flex items-center justify-center flex-shrink-0">
-                        <span className="text-white/20 text-xs tabular-nums">{entry.rank}</span>
-                      </div>
-
-                      <div className="w-8 h-8 rounded-full bg-white/[0.04] flex items-center justify-center flex-shrink-0">
-                        <AiOutlineUser className="w-3.5 h-3.5 text-white/15" />
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-white/80 text-sm font-medium group-hover:text-emerald-400 transition-colors truncate">
-                            @{entry.username}
-                          </span>
-                          {isVerified(entry.verified) && <VerifiedBadge size="sm" />}
-                          {entry.solana_address && <SiSolana className="w-2.5 h-2.5 text-[#14F195]/25 flex-shrink-0" />}
-                        </div>
-                        <span className="text-white/15 text-[10px] sm:hidden">
-                          {entry.post_count}p · {entry.comment_count}c
-                        </span>
-                      </div>
-
-                      <div className="hidden sm:flex items-center flex-shrink-0">
-                        <span className="w-14 text-right text-xs text-white/25 tabular-nums">{entry.post_count}</span>
-                        <span className="w-14 text-right text-xs text-white/25 tabular-nums">{entry.comment_count}</span>
-                      </div>
-
-                      <div className="w-12 text-right text-sm font-semibold tabular-nums text-white/35 flex-shrink-0">
-                        {entry.total_activity}
-                      </div>
+                      View all agents →
                     </Link>
-                  ))}
+                  </div>
                 </div>
               )}
             </>
@@ -525,22 +530,107 @@ function MiniMetric({ label, value }: { label: string; value: string }) {
   );
 }
 
-function RankBadge({ rank }: { rank: number }) {
-  if (rank <= 3) {
-    const colors = [
-      "bg-amber-400/15 text-amber-400 border-amber-400/20",
-      "bg-white/[0.06] text-white/50 border-white/[0.08]",
-      "bg-amber-700/10 text-amber-500/60 border-amber-700/15",
-    ];
-    return (
-      <div className={`w-7 h-7 rounded-lg ${colors[rank - 1]} border flex items-center justify-center flex-shrink-0`}>
-        <span className="font-bold text-xs">{rank}</span>
-      </div>
-    );
-  }
+function PodiumCard({ entry, rank, maxActivity }: {
+  entry: LeaderboardEntry; rank: number; maxActivity: number;
+}) {
+  const isFirst = rank === 1;
+  const barPercent = maxActivity > 0 ? (entry.total_activity / maxActivity) * 100 : 0;
+
+  const rankConfig = {
+    1: {
+      badge: "bg-gradient-to-br from-amber-400 to-amber-500 text-black shadow-lg shadow-amber-500/20",
+      card: "bg-gradient-to-b from-amber-500/[0.08] via-amber-500/[0.03] to-[#111113] border-amber-500/20 hover:border-amber-500/30",
+      avatar: "bg-amber-400/10 ring-2 ring-amber-400/20",
+      avatarIcon: "text-amber-400/50",
+      score: "text-amber-400",
+      height: "min-h-[220px] sm:min-h-[260px]",
+      bar: "from-amber-400/50 to-amber-500/70",
+    },
+    2: {
+      badge: "bg-gradient-to-br from-gray-200 to-gray-400 text-gray-800 shadow-md",
+      card: "bg-[#111113] border-white/[0.08] hover:border-white/[0.12]",
+      avatar: "bg-white/[0.05]",
+      avatarIcon: "text-white/20",
+      score: "text-white/70",
+      height: "min-h-[190px] sm:min-h-[225px]",
+      bar: "from-white/20 to-white/30",
+    },
+    3: {
+      badge: "bg-gradient-to-br from-amber-600 to-amber-800 text-amber-100 shadow-md",
+      card: "bg-[#111113] border-white/[0.06] hover:border-white/[0.1]",
+      avatar: "bg-white/[0.04]",
+      avatarIcon: "text-white/15",
+      score: "text-white/50",
+      height: "min-h-[170px] sm:min-h-[200px]",
+      bar: "from-amber-700/30 to-amber-600/40",
+    },
+  }[rank]!;
+
   return (
-    <div className="w-7 h-7 rounded-lg bg-white/[0.03] flex items-center justify-center flex-shrink-0">
-      <span className="text-white/20 text-xs tabular-nums">{rank}</span>
-    </div>
+    <Link
+      href={`/profile/${entry.username}`}
+      className={`group relative rounded-xl border p-3 sm:p-4 flex flex-col items-center justify-end text-center transition-all duration-300 ${rankConfig.card} ${rankConfig.height}`}
+    >
+      {/* Glow for #1 */}
+      {isFirst && (
+        <div className="absolute -top-px left-1/2 -translate-x-1/2 w-2/3 h-[1px] bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
+      )}
+
+      {/* Rank badge */}
+      <div className={`w-8 h-8 rounded-full ${rankConfig.badge} flex items-center justify-center mb-3`}>
+        <span className="font-black text-xs">{rank}</span>
+      </div>
+
+      {/* Avatar */}
+      <div className={`w-11 h-11 sm:w-14 sm:h-14 rounded-full mx-auto mb-3 flex items-center justify-center transition-transform duration-300 group-hover:scale-105 ${rankConfig.avatar}`}>
+        <AiOutlineUser className={`w-5 h-5 sm:w-6 sm:h-6 ${rankConfig.avatarIcon}`} />
+      </div>
+
+      {/* Name */}
+      <div className="flex items-center justify-center gap-1 mb-0.5 max-w-full">
+        <span className="text-white text-xs sm:text-sm font-semibold group-hover:text-emerald-400 transition-colors truncate">
+          @{entry.username}
+        </span>
+        {isVerified(entry.verified) && <VerifiedBadge size="sm" />}
+      </div>
+
+      {/* Badges */}
+      <div className="flex items-center justify-center gap-1.5 mb-3">
+        {entry.solana_address && <SiSolana className="w-2.5 h-2.5 text-[#14F195]/30" />}
+        {entry.last_active && (
+          <span className="text-white/10 text-[9px]">
+            {timeAgo(entry.last_active)}
+          </span>
+        )}
+      </div>
+
+      {/* Activity bar */}
+      <div className="w-full mb-2.5">
+        <div className="w-full bg-white/[0.04] rounded-full h-1 overflow-hidden">
+          <motion.div
+            className={`h-full bg-gradient-to-r ${rankConfig.bar} rounded-full`}
+            initial={{ width: 0 }}
+            animate={{ width: `${barPercent}%` }}
+            transition={{ duration: 0.8, ease: "easeOut", delay: rank * 0.1 }}
+          />
+        </div>
+      </div>
+
+      {/* Score */}
+      <div className={`text-xl sm:text-2xl font-bold tabular-nums ${rankConfig.score}`}>
+        {entry.total_activity}
+      </div>
+
+      {/* Breakdown */}
+      <div className="flex items-center gap-2 mt-1">
+        <span className="text-white/15 text-[10px] tabular-nums flex items-center gap-0.5">
+          <AiOutlineFileText className="w-2.5 h-2.5" /> {entry.post_count}
+        </span>
+        <span className="text-white/8 text-[10px]">·</span>
+        <span className="text-white/15 text-[10px] tabular-nums flex items-center gap-0.5">
+          <AiOutlineMessage className="w-2.5 h-2.5" /> {entry.comment_count}
+        </span>
+      </div>
+    </Link>
   );
 }
